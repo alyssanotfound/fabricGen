@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="imageDB">
+    <img id="fabric" src="vlisco.jpg" alt="input fabric" width="497" height="607" >
+    <img id="plant" src="plants.jpg" alt="plants" width="497" height="607" >
+    <img id="rose" src="roses.jpg" alt="rose" width="497" height="607" >
+</div>
+<img id="fabric" src="vlisco.jpg" alt="input fabric" width="497" height="607" >
+<img id="plant" src="plants.jpg" alt="plants" width="497" height="607" >
+<img id="rose" src="roses.jpg" alt="rose" width="497" height="607" >
+<canvas id="myCanvas" width="497" height="607" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas2" width="497" height="607" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script src="./imageDB.js"></script>
+<script src="./colors.js"></script>
+<script>
+    // --------------------------- LOAD IMAGE DB --------------------------- //
+    document.getElementById("imageDB").onload = function() {
+        console.log("IMAGE-DB")
+    }
+
+
+    // ---------------------------- LOAD CANVAS ---------------------------- //
+    var c = document.getElementById("myCanvas");
+    var c2 = document.getElementById("myCanvas2");
+    var ctx = c.getContext("2d");
+    var ctx2 = c2.getContext("2d");
+
+    document.getElementById("fabric").onload = function() {
+    
+
+    var img = document.getElementById("fabric");
+    var imgPlant = document.getElementById("plant");
+    var imgRose = document.getElementById("rose");
+    
+    //get image data of plant
+    //draw image and position on canvas x,y
+    ctx.drawImage(imgPlant, 0, 0);
+    //copies the pixel data (RGBA) for the specified rectangle on the canvas
+    window.imgDataPlant = ctx.getImageData(0, 0, c.width, c.height);
+    window.plantData = window.imgDataPlant;
+    //console.log(imgDataPlant);
+    //get img data of fabric
+    ctx2.drawImage(img, 0, 0);
+    //copies the pixel data (RGBA) for the specified rectangle on the canvas
+    window.imgData = ctx2.getImageData(0, 0, c.width, c.height);
+    window.fabricData = window.imgData;
+
+    ctx2.drawImage(imgRose, 0, 0);
+    //copies the pixel data (RGBA) for the specified rectangle on the canvas
+    window.imgDataRose = ctx2.getImageData(0, 0, c.width, c.height);
+    window.roseData = window.imgDataRose;
+
+    var hexValues = [];
+    var i;
+    for (i = 0; i < imgData.data.length; i += 4) {
+        // invert colors
+        //imgData.data[i] = 255 - imgData.data[i];
+        //imgData.data[i+1] = 255 - imgData.data[i+1];
+        //imgData.data[i+2] = 255 - imgData.data[i+2];
+        //imgData.data[i+3] = 255;
+        hexValues.push( rgbToHex(imgData.data[i], imgData.data[i+1], imgData.data[i+2]) );
+    }
+    //console.log(hexValues);
+    findClosestHex(hexValues);
+    //ctx.putImageData(imgData, 0, 0);
+};
+
+//convert rgb values to hex
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+function rgbToHex(r, g, b) {
+    return componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+// ---------------------------- FIND CLOSEST COLOR ---------------------------- //
+
+Array.closest = (function () {
+    function dist(s, t) {
+        if (!s.length || !t.length) return 0;
+        return dist(s.slice(2), t.slice(2)) +
+            Math.abs(parseInt(s.slice(0, 2), 16) - parseInt(t.slice(0, 2), 16));
+    }
+
+    return function (arr, str) {
+        var min = 0xffffff;
+        var best, current, i;
+        for (i = 0; i < arr.length; i++) {
+            current = dist(arr[i], str)
+            if (current < min) {
+                min = current
+                best = arr[i];
+            }
+        }
+        return best;
+    };
+}());
+
+function findClosestHex(listHex) {
+    // convert the `colors`-object to an array
+    var colorsArr = [];
+    for(var key in colors) {
+        colorsArr.push(key);
+    }
+    //var hex = "f5deb3";
+    //var match = Array.closest(colorsArr, hex);
+    //console.log( match );
+    //console.log( colors[match] );
+
+
+    window.hexValuesClosest = [];
+    var j;
+
+    for (j = 0; j < listHex.length; j += 1) {
+        var match = Array.closest(colorsArr, listHex[j]);
+        
+        //var styles = [
+        //    'background: #' + match
+        //].join(';')
+
+        //console.log(match);
+        //console.log('%c ^^^^^', styles);
+        //if the pixel is closest to midnight blue, replace it with the pixel data of the plant image
+        var localData = loadAndDrawImage("plants.jpg", j);
+        
+
+        if (match == "c71585"){
+            //load new image to get pixels data from
+            
+            
+            window.fabricData.data[j*4] = localData.data[j*4];
+            window.fabricData.data[(j*4) + 1] = localData.data[(j*4) + 1];
+            window.fabricData.data[(j*4) + 2] = localData.data[(j*4) + 2];
+            
+            
+            //var imgNum = "image" + j;
+            //console.log(imgNum);
+            //var imgLocal = document.getElementById(imgNum);
+            //console.log(imgLocal);
+            //get image data
+            //ctx2.drawImage(imgLocal, 0, 0);
+            //window.imgDataLocal = ctx2.getImageData(0, 0, c2.width, c2.height);
+            //window.localData = window.imgDataLocal;
+            //swap pixels
+            
+        } else if (match == "191970"){
+            window.fabricData.data[j*4] = window.roseData.data[j*4];
+            window.fabricData.data[(j*4) + 1] = window.roseData.data[(j*4) + 1];
+            window.fabricData.data[(j*4) + 2] = window.roseData.data[(j*4) + 2];
+        }
+        hexValuesClosest.push( match );
+        //console.log( colors[match] );
+    }
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+    ctx.putImageData(window.fabricData, 0, 0);
+    return hexValuesClosest;
+}
+
+//load and draw image
+function loadAndDrawImage(url, colorNum) {
+    // Create an image object. This is not attached to the DOM and is not part of the page.
+    var image = new Image();
+    //var imgNum = "image" + colorNum;
+    // When the image has loaded, draw it to the canvas
+    image.onload = function()
+    {
+        ctx2.drawImage(image, 0, 0);
+        // window.imgDataLocal = ctx2.getImageData(0, 0, c2.width, c2.height);
+        
+    }
+ 
+    // Now set the source of the image that we want to load
+    image.src = url;
+    //image.id = imgNum;
+    console.log(image);
+    return window.imgDataLocal;
+    
+}
+
+</script>
+
+</body>
+</html>

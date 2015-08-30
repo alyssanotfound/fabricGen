@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<body>
+<img id="fabric" src="vlisco.jpg" alt="input fabric" width="497" height="607" >
+<img id="plant" src="plants.jpg" alt="plants" width="497" height="607" >
+<img id="rose" src="roses.jpg" alt="rose" width="497" height="607" >
+<canvas id="myCanvas" width="497" height="607" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas2" width="497" height="607" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+
+
+
+// ---------------------------- LOAD CANVAS ---------------------------- //
+document.getElementById("fabric").onload = function() {
+    var c = document.getElementById("myCanvas");
+    var c2 = document.getElementById("myCanvas2");
+    
+    var ctx = c.getContext("2d");
+    var ctx2 = c2.getContext("2d");
+    
+    var img = document.getElementById("fabric");
+    var imgPlant = document.getElementById("plant");
+    var imgRose = document.getElementById("rose");
+
+    //get image data of plant
+    //draw image and position on canvas x,y
+    ctx.drawImage(imgPlant, 0, 0);
+    //copies the pixel data (RGBA) for the specified rectangle on the canvas
+    window.imgDataPlant = ctx.getImageData(0, 0, c.width, c.height);
+    window.plantData = window.imgDataPlant;
+    //console.log(imgDataPlant);
+    //get img data of fabric
+    ctx2.drawImage(img, 0, 0);
+    //copies the pixel data (RGBA) for the specified rectangle on the canvas
+    window.imgData = ctx2.getImageData(0, 0, c.width, c.height);
+    window.fabricData = window.imgData;
+
+    ctx2.drawImage(imgRose, 0, 0);
+    window.imgDataRose = ctx2.getImageData(0, 0, c.width, c.height);
+    window.roseData = window.imgDataRose;
+
+
+
+};
+</script>
+
+</body>
+</html>
